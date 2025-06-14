@@ -3,14 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <title>Type-Aware Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/acorn@8.10.0/dist/acorn.min.js"></script>
+  
+  
   <style>
-  body {
-  font-family: monospace;
-  background: #333;
+  
+  html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body {
+  font-family: monospace;
+  background: #333;
   width: 100%;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
   
  /* ====== Header Styles ====== */
@@ -138,39 +150,75 @@ header.header {
   
 
 /* ====== Container Styles ====== */
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  padding: 60px 10px 10px 10px; /* টপ প্যাডিং হেডার স্পেসের জন্য */
-}
-  
-  
- 
 
-textarea,
-pre,
-.btn-group {
+  .container {
+  flex: 1;
   width: 100%;
   box-sizing: border-box;
-  margin: 0;
+  padding: 60px 10px 0px 10px; /* হেডার স্পেস */
+}
+  
+  
+  /*Tex Area Box*/
+#code {
+  margin-top: 0 ;
+  width: 100%;
+  min-height: 250px;               /* চাইলে বাড়াও */
+  padding: 10px 10px 50px 10px;    /* নিচে বেশি padding */
+  background: #2c2c2c;
+  color: #fff;
+  font-family: monospace;
   font-size: 14px;
-}
-
-textarea {
-  height: 150px;
-  padding: 10px;
+  border: 1px solid #444;
+  box-sizing: border-box;
   resize: vertical;
+  border-radius: 8px;
+  line-height: 1.6;
+  overflow-y: auto;
 }
 
-pre {
+
+/* ✅ placeholder-এর আলাদা স্টাইল */
+#code::placeholder {
+  color: #aaa;         /* হালকা ধূসর যেন ডার্ক ব্যাকগ্রাউন্ডে দেখা যায় */
+  opacity: 1;          /* কিছু ব্রাউজারে default opacity কম থাকে */
+}
+  
+  
+  textarea:focus {
+  outline: 1px solid #c084fc; /* সফট বেগুনি */
+  outline-offset: 1px;
+}
+
+  
+pre#out {
   height: 250px;
-  background: #000;
-  color: #0f0;
-  padding: 10px;
+  background: #2c2c2c; /* ✅ খালি অবস্থার রঙ */
+  color: #fff;
+  padding: 20px 10px 10px 10px;
   overflow: auto;
   white-space: pre-wrap;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  text-align: left;
+  line-height: 1.4;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 18px;
+  font-weight: normal;
+  }
+
+/* ✅ আউটপুট টেক্সট আলাদা ব্লকে দেখানোর জন্য */
+pre#out span {
+  display: block;
 }
+
+/* ✅ যখন টেক্সট থাকে, তখন টার্মিনালমতো ব্ল্যাক ব্যাকগ্রাউন্ড */
+pre#out.filled {
+  background: #000;
+  color: #0f0; /* তুমি চাইলে এটা #fff বা অন্য কিছু রাখতে পারো */
+}
+  
+  
 
 .error {
   color: #f55;
@@ -178,103 +226,128 @@ pre {
   white-space: pre-wrap;
 }
 
+  
+  /* কমন স্টাইল যা btn-group এবং btn-group button দুইটার জন্য */
+.btn-group,
+.btn-group button {
+  box-sizing: border-box;
+  font-family: monospace;
+  margin: 0;
+}
+
+/* btn-group এর নিজস্ব স্টাইল */
 .btn-group {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0;
-  margin-top: 10px;
-  margin-bottom: 10px; /* ✅ এই লাইন নতুন */
   width: 100%;
-  box-sizing: border-box;
+  gap: 0;
+  margin: 10px 0;
+  font-size: 14px;
 }
 
+/* btn-group এর ভিতরের button এর স্টাইল */
 .btn-group button {
   flex: 1;
   min-width: 0;
   padding: 6px 10px;
-  margin: 0;
-  font-family: monospace;
   font-size: 13px;
   background-color: #2c2c2c;
   color: #f0f0f0;
   border: 1px solid #1a1a1a;
-  border-radius: 0;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
+  
 
+/* আলাদা হোভার স্টাইল */
 .btn-group button:hover {
   background-color: #3a3a3a;
 }
 
+/* আলাদা অ্যাকটিভ স্টাইল */
 .btn-group button:active {
   transform: translateY(1px);
 }
-   
+  .btn-run {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.btn-redo {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+  
+  
+  
+  
   
   
   /* ফুটারের স্টাইল */
-.footer {
-  width: 100vw;               /* পুরো ভিউপোর্ট প্রস্থ */
-  max-width: 100%;            /* বেশি না বাড়তে দেয় */
-  background: #222;
+
+ .footer {
+  margin-top: auto;
+  width: 100vw;
+  max-width: 100%;
+  background:#1e1e1e;
   color: white;
-  padding: 20px 10px 8px;     /* উপরের ও পাশে padding, নিচে 8px */
+  padding: 20px 10px 8px;
   box-sizing: border-box;
   font-family: sans-serif;
   user-select: none;
-  margin: 0;                  /* কোন margin রাখবেন না */
 }
 
-/* ফুটারের মেনু গ্রিড স্টাইল */
 .footer-menu {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* ৩টি কলাম */
-  grid-template-rows: repeat(3, auto);   /* ৩টি সারি */
-  row-gap: 8px;
-  column-gap: 10px;
-  justify-items: center;       /* প্রতিটি সেলে সেন্টার এলাইন */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, auto);
+  gap: 6px 10px;
+  justify-items: center;
   text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-/* প্রতিটি কলামের ভিতরের ডিভগুলোর প্যাডিং */
-.footer-col > div {
-  padding: 3px 0;
-}
-
-/* তিনটি কলামের আইটেম আলাদা আলাদা সারিতে সাজানো */
-/* left column: A B C */
+/* 3x3 গ্রিড অনুযায়ী সেল পজিশনিং */
 .footer-left > div:nth-child(1) { grid-row: 1; grid-column: 1; }
 .footer-left > div:nth-child(2) { grid-row: 2; grid-column: 1; }
 .footer-left > div:nth-child(3) { grid-row: 3; grid-column: 1; }
 
-/* middle column: D E F */
 .footer-middle > div:nth-child(1) { grid-row: 1; grid-column: 2; }
 .footer-middle > div:nth-child(2) { grid-row: 2; grid-column: 2; }
 .footer-middle > div:nth-child(3) { grid-row: 3; grid-column: 2; }
 
-/* right column: I J K */
 .footer-right > div:nth-child(1) { grid-row: 1; grid-column: 3; }
 .footer-right > div:nth-child(2) { grid-row: 2; grid-column: 3; }
 .footer-right > div:nth-child(3) { grid-row: 3; grid-column: 3; }
 
-/* copyright আলাদা, নিচে পুরো হরিজন্টাল জায়গায় সেন্টার */
+.footer-col > div {
+  padding: 2px 0;
+  font-size: 13px;
+}
+
 .copyright {
-  margin-top: 25px;
-  font-size: 14px;
+  margin-top: 14px;
+  font-size: 13px;
   text-align: center;
   user-select: none;
-  color: #ccc;
+  color: #aaa;
+}
+  
+  
+  @media (max-width: 600px) {
+  pre {
+    font-size: 13px;       /* ছোট স্ক্রীনে ফন্ট সাইজ কমিয়ে দিচ্ছি */
+    padding: 10px 8px 8px 8px; /* প্যাডিংও কমানো হয়েছে */
+    height: 180px;         /* হাইট একটু ছোট */
+  }
 }
   
   
   
-  
-  
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/acorn@8.10.0/dist/acorn.min.js"></script>
+</style>
 </head>
 <body>
   
@@ -344,7 +417,7 @@ pre {
   
   
   <div class="container">
-  <textarea id="code">console.log("hello js")</textarea><br>
+  <textarea id="code">console.log(' hello js '); </textarea><br>
   
   <div class="btn-group">
     <button class="btn-run" onclick="run()">Run</button>
@@ -360,34 +433,28 @@ pre {
   
   <footer class="footer">
   <div class="footer-menu">
-    <div class="footer-col footer-left">
-      <div>About</div>
-      <div>Docs</div>
-      <div>Forum</div>
-    </div>
-    <div class="footer-col footer-middle">
-      <div>Description</div>
-      <div>Code</div>
-      <div>Debugging</div>
-    </div>
-    <div class="footer-col footer-right">
-      <div>Contact</div>
-      <div>FAQ</div>
-      <div>Social</div>
-    </div>
+    <div>About</div>         <!-- Row 1 -->
+    <div>Description</div>
+    <div>Contact</div>
+
+    <div>Docs</div>          <!-- Row 2 -->
+    <div>Code</div>
+    <div>FAQ</div>
+
+    <div>Forum</div>         <!-- Row 3 -->
+    <div>Debugging</div>
+    <div>Social</div>
   </div>
   <div class="copyright">
     &copy; 2025 JS Debuger, All Rights Reserved.
   </div>
 </footer>
- 
-  
   
   
   
   <script>
     
-  const out = document.getElementById("out");
+const out = document.getElementById("out");
 const input = document.getElementById("code");
 
 const undoStack = [];
@@ -475,9 +542,6 @@ function run() {
     log("error", `❌ Runtime Error: ${err.name} — ${err.message}`);
   }
 }
-  
-  
-  
 
 function copyInput() {
   const input = document.getElementById('code');
@@ -539,9 +603,21 @@ document.addEventListener('click', function (e) {
     });
   }
 });
+
+// ——— এখানে যোগ করলাম ———
+
+const observer = new MutationObserver(() => {
+  if (out.textContent.trim().length > 0) {
+    out.classList.add("filled");
+  } else {
+    out.classList.remove("filled");
+  }
+});
+observer.observe(out, { childList: true, subtree: true });
+  
+  
   
   </script>
 </body>
 </html>
-
 
