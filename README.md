@@ -1,0 +1,2 @@
+# y.com
+Fast Net
